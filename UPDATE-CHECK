@@ -1,0 +1,21 @@
+- Clean the source code (commenting Debugs, etc).
+- Verify all comment in the code.
+- Test all configuration interface.
+- Update README.md if needed.
+- Update ChangeLog at GitHub.
+- Update copyright date.
+- Verify copyright notices at:
+    ~ CompactRepresentation.qml
+    ~ GeneralConfig.qml
+    ~ GetAPI.qml
+- Verify commits author (name and email).
+- Change version at:
+    ~ metadata.json
+    ~ GeneralConfig.qml
+- Release on GitHub.
+- Upload tarball (tar.xz) to:
+    ~ GitHub
+    ~ KDE Store
+- Update ChangeLog on KDE Store.
+- Update Version on KDE Store (Edit).
+- Update screenshots on KDE Store (Edit).

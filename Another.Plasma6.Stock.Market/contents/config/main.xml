@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kcfg xmlns="http://www.kde.org/standards/kcfg/1.0"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.kde.org/standards/kcfg/1.0
+      http://www.kde.org/standards/kcfg/1.0/kcfg.xsd" >
+  <kcfgfile name=""/>
+
+  <group name="General">
+    <entry name="fontSize" type="int">
+      <default>15</default>
+    </entry>
+    <entry name="textBold" type="bool">
+      <default>true</default>
+    </entry>
+    <entry name="tickerName" type="string">
+      <default>MSTR</default>
+    </entry>
+    <entry name="showTickerName" type="bool">
+      <default>true</default>
+    </entry>
+    <entry name="priceMultiplier" type="string">
+      <default>1</default>
+    </entry>
+    <entry name="decimalPlaces" type="int">
+      <default>2</default>
+    </entry>
+    <entry name="useThousandsSeparator" type="bool">
+      <default>false</default>
+    </entry>
+    <entry name="swapCommasDots" type="bool">
+      <default>false</default>
+    </entry>
+    <entry name="textColor" type="string">
+      <default></default>
+    </entry>
+    <entry name="timeRefresh" type="int">
+      <default>3</default>
+    </entry>
+    <entry name="blinkRefresh" type="bool">
+      <default>false</default>
+    </entry>
+    <entry name="apiKey" type="string">
+      <default></default>
+    </entry>
+  </group>
+
+</kcfg>

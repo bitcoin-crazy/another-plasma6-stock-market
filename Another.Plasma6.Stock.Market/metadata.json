@@ -1,0 +1,22 @@
+{
+    "KPackageStructure": "Plasma/Applet",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Name": "bitcoin-crazy"
+            }
+        ],
+        "Name": "Another Plasma6 Stock Market",
+        "Id": "Another.Plasma6.Stock.Market",
+        "Description": "Displays real-time stock prices for U.S. companies",
+        "Category": "Utilities",
+        "Icon": "sheets",
+        "EnabledByDefault": true,
+        "License": "GPL-3.0+",
+        "BugReportUrl": "https://github.com/bitcoin-crazy/another-plasma6-stock-market/issues",
+        "Version": "1.0",
+        "Website": "https://github.com/bitcoin-crazy/another-plasma6-stock-market/"
+    },
+    "X-Plasma-API-Minimum-Version": "6.0",
+    "X-Plasma-MainScript": "ui/main.qml"
+}
