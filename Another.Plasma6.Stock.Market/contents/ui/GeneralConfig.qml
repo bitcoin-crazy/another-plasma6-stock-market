@@ -276,7 +276,7 @@ Item {
                         configurationChanged()
                     }
                     ToolTip.visible: hovered
-                    ToolTip.text: i18n("Get a free API key at https://finnhub.io/")
+                    ToolTip.text: i18n("Using an API key is mandatory. Get a free API key at https://finnhub.io/")
                 }
 
                 // Applet version
@@ -289,6 +289,18 @@ Item {
                 Label {
                     Layout.minimumWidth: root.width / 2
                     text: i18n("1.0    (2025-05-08)")
+                }
+
+                // Website
+                Label {
+                    Layout.minimumWidth: root.width / 2
+                    text: i18n("AP6 Stock Market, website:")
+                    horizontalAlignment: Label.AlignRight
+                }
+
+                Label {
+                    Layout.minimumWidth: root.width / 2
+                    text: "https://github.com/bitcoin-crazy/"
                 }
 
             }  // Closing GridLayout
