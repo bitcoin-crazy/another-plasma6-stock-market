@@ -13,6 +13,7 @@ Item {
     property int decimalPlaces: 2
     property int refreshRate: Plasmoid.configuration.timeRefresh || 3 // Refresh rate in minutes, linked to config
     property var price: null // Set no initial price
+    property var dailyPriceChangePercentage: null
     property bool inErrorState: false
 
     onTickerNameChanged: updatePrice()
@@ -36,8 +37,9 @@ Item {
             if (req.status === 200) {
                 try {
                     const data = JSON.parse(req.responseText);
-                    if (data && data.c) {
+                    if (data && data.c && data.dp) {
                         price = parseFloat(data.c); // Parse and store the price
+                        dailyPriceChangePercentage = parseFloat(data.dp);
                         inErrorState = false;
                     } else {
                         // If no valid price data, set as error state

@@ -42,6 +42,9 @@
     <entry name="apiKey" type="string">
       <default></default>
     </entry>
+    <entry name="tickerValue" type="string">
+      <default>current_price</default>
+    </entry>
   </group>
 
 </kcfg>

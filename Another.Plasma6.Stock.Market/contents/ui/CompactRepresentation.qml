@@ -53,6 +53,21 @@ ColumnLayout {
         return formattedPrice;
     }
 
+    function formatPriceChange(priceChange) {
+        let numChange = parseFloat(priceChange);
+        if (isNaN(numChange)) {
+            return priceChange;
+        }
+
+        let formattedChange = formatPrice(numChange.toFixed(Plasmoid.configuration.decimalPlaces));
+
+        if (numChange >= 0) {
+            formattedChange = "+" + formattedChange;
+        }
+
+        return formattedChange + "%";
+    }
+
     Layout.minimumWidth: tickerText.implicitWidth + pixelFontVar * 4
     Layout.minimumHeight: heightroot
 
@@ -73,6 +88,9 @@ ColumnLayout {
             getApi.tickerName = Plasmoid.configuration.tickerName;
             getApi.updatePrice();
         }
+        onTickerValueChanged: {
+            getApi.updatePrice();
+        }
     }
 
     // Determine which price text should be shown with multiplier applied
@@ -80,13 +98,21 @@ ColumnLayout {
         if (getApi.price === "E") {
             return "Err";
         }
-        if (getApi.price !== null && !isNaN(getApi.price)) {
-            // Apply price multiplier from configuration
-            var price = parseFloat(getApi.price);
-            var multiplier = Plasmoid.configuration.priceMultiplier || 1; // Default to 1 if multiplier is not set
-            return formatPrice((price * multiplier).toFixed(Plasmoid.configuration.decimalPlaces));
+
+        var multiplier = Plasmoid.configuration.priceMultiplier || 1;
+        switch (Plasmoid.configuration.tickerValue) {
+            case "daily_price_change_percentage":
+                var priceChange = parseFloat(getApi.dailyPriceChangePercentage);
+                return formatPriceChange(priceChange * multiplier);
+            case "current_price":
+                if (getApi.price !== null && !isNaN(getApi.price)) {
+                    var price = parseFloat(getApi.price);
+                    return formatPrice((price * multiplier).toFixed(Plasmoid.configuration.decimalPlaces));
+                }
+                return "?";
+            default:
+                return "Err";
         }
-        return "?";
     }
 
     Text {
@@ -114,6 +140,13 @@ ColumnLayout {
         color: {
             if (displayedPrice === "Err") {
                 return Plasmoid.configuration.errorColor || Kirigami.Theme.negativeTextColor;
+            }
+            if (Plasmoid.configuration.tickerValue === "daily_price_change_percentage") {
+                if (getApi.dailyPriceChangePercentage > 0) {
+                    return Kirigami.Theme.positiveTextColor;
+                } else if (getApi.dailyPriceChangePercentage < 0) {
+                    return Kirigami.Theme.negativeTextColor;
+                }
             }
             return Plasmoid.configuration.textColor || Kirigami.Theme.textColor;
         }

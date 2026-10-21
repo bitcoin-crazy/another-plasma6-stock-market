@@ -9,6 +9,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts 1.11
 import org.kde.kirigami as Kirigami
+import "./components" as Components
 
 Item {
     id: configRoot
@@ -108,6 +109,25 @@ Item {
                 }
                     ToolTip.visible: hovered
                     ToolTip.text: i18n("USA Stock Market Ticker, like MSTR, AAPL, AMZN, GE, or SPY. Only uppercase letters and dots are allowed.")
+                }
+
+                // Ticker Value
+                Label {
+                    Layout.minimumWidth: root.width / 2
+                    text: i18n("Ticker Value:")
+                    horizontalAlignment: Label.AlignRight
+                }
+                Components.ConfigComboBox {
+                    cfg_key: "tickerValue"
+                    cfg_defaultValue: "current_price"
+                    model: [
+                        { text: i18n("Current Price"), value: "current_price" },
+                        { text: i18n("Daily Price Change (%)"), value: "daily_price_change_percentage" }
+                    ]
+                    onCurrentValueChanged: {
+                        plasmoid.configuration.tickerValue = currentValue;
+                        configurationChanged();
+                    }
                 }
 
                 // Show Ticker Name
