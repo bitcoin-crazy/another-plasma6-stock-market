@@ -5,6 +5,7 @@ Version 1.1 - 2026-10-??
   * Fixed invalid multiplier (empty, dot) displaying NaN.
   * Fixed thousands separator breaking decimal places.
   * Fixed ticker field accepting BRK.B and similar.
+  * Ignoring price multiplier when displaying daily price change percentage.
   * Removed code: priceFlash, errorColor, inErrorState check, ConfigComboBox.
   * Removed duplicate default values from QML (use main.xml only).
   * Removed duplicate refresh timers and debounce ticker/API key changes.

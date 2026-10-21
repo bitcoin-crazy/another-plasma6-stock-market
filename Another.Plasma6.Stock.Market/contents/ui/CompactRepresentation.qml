@@ -62,7 +62,7 @@ ColumnLayout {
             case "daily_price_change_percentage":
                 if (getApi.dailyPriceChangePercentage === null)
                     return "?";
-                return formatPriceChange(getApi.dailyPriceChangePercentage * multiplier);
+                return formatPriceChange(getApi.dailyPriceChangePercentage);
             case "current_price":
                 if (getApi.price === null)
                     return "?";
