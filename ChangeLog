@@ -1,6 +1,8 @@
 Version 1.1 - 2026-10-??
+  * Added Enabled option (displays "X" and stops requests when disabled).
   * Added response ordering and timeout to prevent stale updates.
   * Added SPDX headers to main.qml, config.qml, main.xml.
+  * Blink Refresh enabled by default.
   * Fixed daily price change of 0% showing as error.
   * Fixed invalid multiplier (empty, dot) displaying NaN.
   * Fixed thousands separator breaking decimal places.

@@ -51,6 +51,7 @@ ColumnLayout {
         id: getApi
         tickerName: Plasmoid.configuration.tickerName
         apiKey: Plasmoid.configuration.apiKey
+        active: Plasmoid.configuration.enabled
     }
 
     // Text shown in the toolbar, with the multiplier applied
@@ -73,8 +74,20 @@ ColumnLayout {
     }
 
     Text {
+        id: disabledText
+        visible: !Plasmoid.configuration.enabled
+        width: wrapper.width
+        font.pixelSize: pixelFontVar
+        font.bold: true
+        color: baseTextColor
+        horizontalAlignment: Text.AlignHCenter
+        verticalAlignment: Text.AlignVCenter
+        text: "X"
+    }
+
+    Text {
         id: tickerText
-        visible: Plasmoid.configuration.showTickerName
+        visible: Plasmoid.configuration.showTickerName && Plasmoid.configuration.enabled
         width: wrapper.width
         font.pixelSize: pixelFontVar2
         color: getApi.inErrorState ? Kirigami.Theme.negativeTextColor : baseTextColor
@@ -87,6 +100,7 @@ ColumnLayout {
 
     Text {
         id: priceText
+        visible: Plasmoid.configuration.enabled
         width: wrapper.width
         font.pixelSize: pixelFontVar
         color: {
@@ -111,6 +125,7 @@ ColumnLayout {
 
     MouseArea {
         anchors.fill: priceText
+        enabled: Plasmoid.configuration.enabled
         onClicked: {
             getApi.updatePrice(); // Update price when clicking
             fadeAnimation.start();
@@ -126,7 +141,7 @@ ColumnLayout {
     Timer {
         interval: (Plasmoid.configuration.timeRefresh || 3) * 60000 // Minutes to milliseconds
         repeat: true
-        running: true
+        running: Plasmoid.configuration.enabled
         onTriggered: {
             getApi.updatePrice();
             if (Plasmoid.configuration.blinkRefresh)

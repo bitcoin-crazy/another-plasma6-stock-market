@@ -14,12 +14,27 @@ Item {
     property var price: null                        // number, or null when unknown/error
     property var dailyPriceChangePercentage: null   // number, or null when unknown/error
     property bool inErrorState: false
+    property bool active: true                      // false: no requests at all (applet disabled)
 
     property int requestId: 0                       // only the latest request may update the data
 
     // Ticker or API key changed: wait a little, so typing does not fire one request per key
     onTickerNameChanged: debounce.restart()
     onApiKeyChanged: debounce.restart()
+
+    onActiveChanged: {
+        if (active) {
+            updatePrice();
+        } else {
+            // Cancel anything pending and forget the old data
+            requestId++;
+            debounce.stop();
+            retry.stop();
+            price = null;
+            dailyPriceChangePercentage = null;
+            inErrorState = false;
+        }
+    }
 
     function setError(retryLater) {
         price = null;
@@ -30,7 +45,7 @@ Item {
     }
 
     function updatePrice() {
-        if (!tickerName)
+        if (!active || !tickerName)
             return;
 
         if (!apiKey) {

@@ -13,6 +13,9 @@
   <kcfgfile name=""/>
 
   <group name="General">
+    <entry name="enabled" type="bool">
+      <default>true</default>
+    </entry>
     <entry name="fontSize" type="int">
       <default>15</default>
     </entry>
@@ -44,7 +47,7 @@
       <default>3</default>
     </entry>
     <entry name="blinkRefresh" type="bool">
-      <default>false</default>
+      <default>true</default>
     </entry>
     <entry name="apiKey" type="string">
       <default></default>

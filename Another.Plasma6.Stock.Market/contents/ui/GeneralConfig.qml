@@ -15,6 +15,7 @@ Item {
 
     signal configurationChanged
 
+    property alias cfg_enabled: enabledCheckBox.checked
     property alias cfg_fontSize: fontSizeSpinBox.value
     property alias cfg_textBold: boldTextCheck.checked
     property alias cfg_tickerName: textTickerField.text
@@ -44,6 +45,19 @@ Item {
                 Layout.minimumWidth: preferredWidth
                 Layout.maximumWidth: preferredWidth
                 columns: 2
+
+                // Enabled
+                Label {
+                    Layout.minimumWidth: root.width / 2
+                    text: i18n("Enabled:")
+                    horizontalAlignment: Label.AlignRight
+                }
+                CheckBox {
+                    id: enabledCheckBox
+                    onCheckedChanged: configurationChanged()
+                    ToolTip.visible: hovered
+                    ToolTip.text: i18n("Enable or disable the applet. If disabled, a \"X\" will be displayed.")
+                }
 
                 // Font size
                 Label {

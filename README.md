@@ -70,6 +70,7 @@ Another way to install __Another Plasma6 Stock Market__ is to make it manually.
 
 There are some options in `Configuration` window.
 
+* `Enabled` enables or disables the applet. If disabled, an `X` is shown and no prices are requested.
 * `Font Size for Price` will determine the size of the price. The name of the ticker will be shown above the price and its size will be 70% of the price size.
 * `Bold` is for price and stock name.
 * `Ticker` is a text box used to enter the ticker symbol of the stock to be displayed (e.g.: MSTR, AAPL, AMZN, GE, SPY).
