@@ -5,9 +5,12 @@
 - Update ChangeLog at GitHub.
 - Update copyright date.
 - Verify copyright notices at:
+    ~ main.qml
     ~ CompactRepresentation.qml
     ~ GeneralConfig.qml
     ~ GetAPI.qml
+    ~ config.qml
+    ~ main.xml
 - Verify commits author (name and email).
 - Change version at:
     ~ metadata.json

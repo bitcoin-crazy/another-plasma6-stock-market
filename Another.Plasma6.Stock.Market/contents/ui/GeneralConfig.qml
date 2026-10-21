@@ -1,23 +1,22 @@
 /*
  * SPDX-FileCopyrightText: Copyright 2025 zayronxio
- * SPDX-FileCopyrightText: Copyright 2025 bitcoin-crazy
+ * SPDX-FileCopyrightText: Copyright 2025-2026 bitcoin-crazy
  * SPDX-License-Identifier: GPL-3.0-or-later
  * SPDX-SnippetComment: Another Plasma6 Stock Market was initially based on Another Plasma Coin 2.3.
  * SPDX-SnippetComment: Another Plasma6 Coin was initially based on Plasma Coin 1.0.2, from zayronxio.
  */
 import QtQuick
 import QtQuick.Controls
-import QtQuick.Layouts 1.11
+import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
-import "./components" as Components
 
 Item {
     id: configRoot
 
     signal configurationChanged
 
-    property alias cfg_fontSize: fontsizedefault.value
-    property alias cfg_textBold: boldTextCkeck.checked
+    property alias cfg_fontSize: fontSizeSpinBox.value
+    property alias cfg_textBold: boldTextCheck.checked
     property alias cfg_tickerName: textTickerField.text
     property alias cfg_showTickerName: showTickerNameCheckBox.checked
     property alias cfg_decimalPlaces: decimalPlacesSpinBox.value
@@ -28,11 +27,7 @@ Item {
     property alias cfg_timeRefresh: timeRefreshSpinBox.value
     property alias cfg_blinkRefresh: blinkRefreshCheckBox.checked
     property alias cfg_apiKey: textAPIField.text
-
-    Component.onCompleted: {
-        textTickerField.text = Plasmoid.configuration.tickerName || "MSTR"
-        textAPIField.text = Plasmoid.configuration.cfg_apiKey || ""
-    }
+    property string cfg_tickerValue
 
     ScrollView {
         width: parent.width
@@ -58,7 +53,7 @@ Item {
                 }
                 SpinBox {
                     from: 5
-                    id: fontsizedefault
+                    id: fontSizeSpinBox
                     to: 40
                 }
 
@@ -69,8 +64,7 @@ Item {
                     horizontalAlignment: Label.AlignRight
                 }
                 CheckBox {
-                    id: boldTextCkeck
-                    text: i18n("")
+                    id: boldTextCheck
                 }
 
                 // Ticker
@@ -93,22 +87,14 @@ Item {
                 }
                 TextField {
                     id: textTickerField
-                    text: "MSTR"
-
-                onTextChanged:  {
-                    var upperText = text.toUpperCase();
-                    var regex = /^[A-Z0-9]{1,6}(\.[A-Z0-9]{1,3})?$/;
-
-                    if (regex.test(upperText)) {
-                        text = upperText;
-                        Plasmoid.configuration.tickerName = text;
+                    validator: RegularExpressionValidator { regularExpression: /^[A-Za-z0-9]{0,6}(\.[A-Za-z0-9]{0,3})?$/ }
+                    onTextChanged: {
+                        if (text !== text.toUpperCase())
+                            text = text.toUpperCase();
                         configurationChanged();
-                    } else {
-                        text = textTickerField.text.slice(0, -1);
                     }
-                }
                     ToolTip.visible: hovered
-                    ToolTip.text: i18n("USA Stock Market Ticker, like MSTR, AAPL, AMZN, GE, or SPY. Only uppercase letters and dots are allowed.")
+                    ToolTip.text: i18n("USA Stock Market Ticker, like MSTR, AAPL, AMZN, GE, SPY, or BRK.B. Only letters, numbers and one dot are allowed.")
                 }
 
                 // Ticker Value
@@ -117,15 +103,16 @@ Item {
                     text: i18n("Ticker Value:")
                     horizontalAlignment: Label.AlignRight
                 }
-                Components.ConfigComboBox {
-                    cfg_key: "tickerValue"
-                    cfg_defaultValue: "current_price"
+                ComboBox {
+                    textRole: "text"
+                    valueRole: "value"
                     model: [
                         { text: i18n("Current Price"), value: "current_price" },
                         { text: i18n("Daily Price Change (%)"), value: "daily_price_change_percentage" }
                     ]
-                    onCurrentValueChanged: {
-                        plasmoid.configuration.tickerValue = currentValue;
+                    currentIndex: Math.max(0, indexOfValue(configRoot.cfg_tickerValue))
+                    onActivated: {
+                        configRoot.cfg_tickerValue = currentValue;
                         configurationChanged();
                     }
                 }
@@ -138,8 +125,6 @@ Item {
                 }
                 CheckBox {
                     id: showTickerNameCheckBox
-                    text: i18n("")
-                    checked: true
                 }
 
                 // Decimal Places
@@ -152,7 +137,6 @@ Item {
                     id: decimalPlacesSpinBox
                     from: 0
                     to: 10
-                    value: 2
                     stepSize: 1
                     onValueChanged: configurationChanged()
                 }
@@ -178,15 +162,8 @@ Item {
 
                 TextField {
                     id: priceMultiplierField
-                    text: "1"
-                    onTextChanged: {
-                        // Check for 4 decimal places
-                        var regex = /^[0-9]*\.?[0-9]{0,4}$/;
-                        if (!regex.test(priceMultiplierField.text)) {
-                            priceMultiplierField.text = priceMultiplierField.text.slice(0, -1);
-                        }
-                        configurationChanged()
-                    }
+                    validator: RegularExpressionValidator { regularExpression: /^[0-9]*\.?[0-9]{0,4}$/ } // Max 4 decimal places
+                    onTextChanged: configurationChanged()
                     ToolTip.visible: hovered
                     ToolTip.text: i18n("Multiply the price by this value. Use only numbers (e.g., 1.3812). Max 4 decimal places. Default: 1. An asterisk will be placed next to the ticker name to symbolize the use of this feature. See the README at https://github.com/bitcoin-crazy/another-plasma6-stock-market for details.")
                 }
@@ -199,8 +176,6 @@ Item {
                 }
                 CheckBox {
                     id: thousandsSeparatorCheckBox
-                    text: i18n("")
-                    checked: false
                     onCheckedChanged: configurationChanged()
                     ToolTip.visible: hovered
                     ToolTip.text: i18n("Format numbers with a thousands separator (e.g., 1,000.23).")
@@ -214,12 +189,7 @@ Item {
                 }
                 CheckBox {
                     id: swapCommasDotsCheckBox
-                    text: i18n("")
-                    checked: cfg_swapCommasDots
-                    onCheckedChanged: {
-                        configurationChanged()
-                        cfg_swapCommasDots = checked
-                    }
+                    onCheckedChanged: configurationChanged()
                     ToolTip.visible: hovered
                     ToolTip.text: i18n("Swap commas for dots and vice-versa to match usage in each country.")
                 }
@@ -232,7 +202,6 @@ Item {
                 }
                 TextField {
                     id: textColorField
-                    text: "#000000"
                     onTextChanged: configurationChanged()
                     ToolTip.visible: hovered
                     ToolTip.text: i18n("Use color names (red, yellowgreen) or HEX code (#ffff00 for yellow). Leave empty to use the theme's default color. Tips in README at https://github.com/bitcoin-crazy/another-plasma6-stock-market")
@@ -248,7 +217,6 @@ Item {
                     id: timeRefreshSpinBox
                     from: 1
                     to: 60
-                    value: 10
                     stepSize: 1
                     onValueChanged: configurationChanged()
                     ToolTip.visible: hovered
@@ -263,8 +231,6 @@ Item {
                 }
                 CheckBox {
                     id: blinkRefreshCheckBox
-                    text: i18n("")
-                    checked: false
                     onCheckedChanged: configurationChanged()
                     ToolTip.visible: hovered
                     ToolTip.text: i18n("Blink the price when it refreshes.")
@@ -290,11 +256,7 @@ Item {
                 }
                 TextField {
                     id: textAPIField
-                    text: ""
-                    onTextChanged: {
-                        Plasmoid.configuration.cfg_apiKey = text
-                        configurationChanged()
-                    }
+                    onTextChanged: configurationChanged()
                     ToolTip.visible: hovered
                     ToolTip.text: i18n("Using an API key is mandatory. Get a free API key at https://finnhub.io/")
                 }

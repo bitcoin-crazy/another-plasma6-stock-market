@@ -1,2 +1,15 @@
+Version 1.1 - 2026-10-??
+  * Added response ordering and timeout to prevent stale updates.
+  * Added SPDX headers to main.qml, config.qml, main.xml.
+  * Fixed daily price change of 0% showing as error.
+  * Fixed invalid multiplier (empty, dot) displaying NaN.
+  * Fixed thousands separator breaking decimal places.
+  * Fixed ticker field accepting BRK.B and similar.
+  * Removed code: priceFlash, errorColor, inErrorState check, ConfigComboBox.
+  * Removed duplicate default values from QML (use main.xml only).
+  * Removed duplicate refresh timers and debounce ticker/API key changes.
+  * Standardize imports (remove versions), fix variable names, remove tabs.
+  * Updated README with Ticker Value option and fix Blink Refresh description.
+
 Version 1.0 - 2025-05-08
   * Initial version.

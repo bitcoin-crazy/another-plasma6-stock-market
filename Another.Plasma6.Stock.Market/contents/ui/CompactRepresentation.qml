@@ -1,13 +1,12 @@
 /*
  * SPDX-FileCopyrightText: Copyright 2025 zayronxio
- * SPDX-FileCopyrightText: Copyright 2025 bitcoin-crazy
+ * SPDX-FileCopyrightText: Copyright 2025-2026 bitcoin-crazy
  * SPDX-License-Identifier: GPL-3.0-or-later
  * SPDX-SnippetComment: Another Plasma6 Stock Market was initially based on Another Plasma Coin 2.3.
  * SPDX-SnippetComment: Another Plasma6 Coin was initially based on Plasma Coin 1.0.2, from zayronxio.
  */
-import QtQuick 2.12
-import QtQuick.Layouts 1.12
-import QtQuick.Controls 2.12
+import QtQuick
+import QtQuick.Layouts
 import org.kde.plasma.plasmoid
 import org.kde.kirigami as Kirigami
 import "components" as Components
@@ -18,98 +17,56 @@ ColumnLayout {
     property int pixelFontVar: Plasmoid.configuration.fontSize
     property int pixelFontVar2: pixelFontVar * 0.7
     property int heightroot: 20
-    property string tickerName: "Unknown Ticker"
 
-    // Function for thousands separator
-    function formatPrice(price) {
-        // Ensure price is always a number
-        let numPrice = parseFloat(price);
-
-        // Check if it's a valid number
-        if (isNaN(numPrice)) {
-            return price; // Return original value if not a valid number
-        }
-
-        // Apply thousand separator if needed
-        let formattedPrice = numPrice.toFixed(Plasmoid.configuration.decimalPlaces);
-
-        // If swapCommasDots is enabled, swap commas and dots
-        if (Plasmoid.configuration.swapCommasDots) {
-            // Swap the dot in the decimal place to a comma
-            formattedPrice = formattedPrice.replace('.', ',');
-
-            // Apply thousands separator using a dot (if thousands separator is enabled)
-            if (Plasmoid.configuration.useThousandsSeparator) {
-                formattedPrice = formattedPrice.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-            }
-        } else {
-            // If swapCommasDots is not enabled, apply thousands separator with dot
-            if (Plasmoid.configuration.useThousandsSeparator) {
-                formattedPrice = formattedPrice.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-            }
-        }
-
-        // Return the formatted price
-        return formattedPrice;
+    // Price multiplier as a number (empty or invalid values count as 1)
+    readonly property real multiplier: {
+        const m = parseFloat(Plasmoid.configuration.priceMultiplier);
+        return isNaN(m) ? 1 : m;
     }
 
-    function formatPriceChange(priceChange) {
-        let numChange = parseFloat(priceChange);
-        if (isNaN(numChange)) {
-            return priceChange;
-        }
+    // User color, or the theme color if empty
+    readonly property var baseTextColor: Plasmoid.configuration.textColor || Kirigami.Theme.textColor
 
-        let formattedChange = formatPrice(numChange.toFixed(Plasmoid.configuration.decimalPlaces));
-
-        if (numChange >= 0) {
-            formattedChange = "+" + formattedChange;
-        }
-
-        return formattedChange + "%";
-    }
-
+    spacing: 0
     Layout.minimumWidth: tickerText.implicitWidth + pixelFontVar * 4
     Layout.minimumHeight: heightroot
+
+    // Formats a number with the configured decimal places and separators
+    function formatNumber(num) {
+        const swap = Plasmoid.configuration.swapCommasDots;
+        const parts = num.toFixed(Plasmoid.configuration.decimalPlaces).split(".");
+
+        // Thousands separator only in the integer part
+        if (Plasmoid.configuration.useThousandsSeparator)
+            parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, swap ? "." : ",");
+
+        return parts.join(swap ? "," : ".");
+    }
+
+    function formatPriceChange(num) {
+        return (num >= 0 ? "+" : "") + formatNumber(num) + "%";
+    }
 
     Components.GetAPI {
         id: getApi
         tickerName: Plasmoid.configuration.tickerName
         apiKey: Plasmoid.configuration.apiKey
-        refreshRate: Plasmoid.configuration.timeRefresh || 3 // Integrating the refresh rate configuration
     }
 
-    Connections {
-        target: Plasmoid.configuration
-        onApiKeyChanged: {
-            getApi.apiKey = Plasmoid.configuration.apiKey;
-            getApi.updatePrice();
-        }
-        onTickerNameChanged: {
-            getApi.tickerName = Plasmoid.configuration.tickerName;
-            getApi.updatePrice();
-        }
-        onTickerValueChanged: {
-            getApi.updatePrice();
-        }
-    }
-
-    // Determine which price text should be shown with multiplier applied
+    // Text shown in the toolbar, with the multiplier applied
     property string displayedPrice: {
-        if (getApi.price === "E") {
+        if (getApi.inErrorState)
             return "Err";
-        }
 
-        var multiplier = Plasmoid.configuration.priceMultiplier || 1;
         switch (Plasmoid.configuration.tickerValue) {
             case "daily_price_change_percentage":
-                var priceChange = parseFloat(getApi.dailyPriceChangePercentage);
-                return formatPriceChange(priceChange * multiplier);
+                if (getApi.dailyPriceChangePercentage === null)
+                    return "?";
+                return formatPriceChange(getApi.dailyPriceChangePercentage * multiplier);
             case "current_price":
-                if (getApi.price !== null && !isNaN(getApi.price)) {
-                    var price = parseFloat(getApi.price);
-                    return formatPrice((price * multiplier).toFixed(Plasmoid.configuration.decimalPlaces));
-                }
-                return "?";
+                if (getApi.price === null)
+                    return "?";
+                return formatNumber(getApi.price * multiplier);
             default:
                 return "Err";
         }
@@ -120,15 +77,10 @@ ColumnLayout {
         visible: Plasmoid.configuration.showTickerName
         width: wrapper.width
         font.pixelSize: pixelFontVar2
-        color: {
-            if (displayedPrice === "Err") {
-                return Plasmoid.configuration.errorColor || Kirigami.Theme.negativeTextColor;
-            }
-            return Plasmoid.configuration.textColor || Kirigami.Theme.textColor;
-        }
+        color: getApi.inErrorState ? Kirigami.Theme.negativeTextColor : baseTextColor
         font.bold: Plasmoid.configuration.textBold
         font.capitalization: Font.AllUppercase
-        text: (Plasmoid.configuration.tickerName || "Unknown ticker") + (Plasmoid.configuration.priceMultiplier !== "1" && Plasmoid.configuration.priceMultiplier !== "" ? "*" : "")
+        text: (Plasmoid.configuration.tickerName || "Unknown ticker") + (multiplier !== 1 ? "*" : "")
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignTop
     }
@@ -138,17 +90,15 @@ ColumnLayout {
         width: wrapper.width
         font.pixelSize: pixelFontVar
         color: {
-            if (displayedPrice === "Err") {
-                return Plasmoid.configuration.errorColor || Kirigami.Theme.negativeTextColor;
-            }
+            if (getApi.inErrorState)
+                return Kirigami.Theme.negativeTextColor;
             if (Plasmoid.configuration.tickerValue === "daily_price_change_percentage") {
-                if (getApi.dailyPriceChangePercentage > 0) {
+                if (getApi.dailyPriceChangePercentage > 0)
                     return Kirigami.Theme.positiveTextColor;
-                } else if (getApi.dailyPriceChangePercentage < 0) {
+                if (getApi.dailyPriceChangePercentage < 0)
                     return Kirigami.Theme.negativeTextColor;
-                }
             }
-            return Plasmoid.configuration.textColor || Kirigami.Theme.textColor;
+            return baseTextColor;
         }
         font.bold: Plasmoid.configuration.textBold
         font.capitalization: Font.AllUppercase
@@ -157,13 +107,6 @@ ColumnLayout {
         verticalAlignment: Text.AlignTop
         wrapMode: Text.WordWrap
         height: 30
-        opacity: 1.0
-
-        Behavior on opacity {
-            NumberAnimation {
-                duration: 1000
-            }
-        }
     }
 
     MouseArea {
@@ -174,40 +117,20 @@ ColumnLayout {
         }
     }
 
-    // Simple color animation for visual feedback
-    ColorAnimation {
-        id: priceFlash
-        target: priceText
-        property: "color"
-        from: Kirigami.Theme.highlightColor
-        to: {
-            if (displayedPrice === "Err") {
-                return Plasmoid.configuration.errorColor || Kirigami.Theme.negativeTextColor;
-            }
-            return Plasmoid.configuration.textColor || Kirigami.Theme.textColor;
-        }
-        duration: 1000
-    }
-
     SequentialAnimation {
         id: fadeAnimation
-        running: false
         PropertyAnimation { target: priceText; property: "opacity"; to: 0.0; duration: 500 }
         PropertyAnimation { target: priceText; property: "opacity"; to: 1.0; duration: 500 }
     }
 
     Timer {
-        id: autoUpdateTimer
-        interval: Plasmoid.configuration.timeRefresh * 60000 // Convert from minutes to milliseconds
+        interval: (Plasmoid.configuration.timeRefresh || 3) * 60000 // Minutes to milliseconds
         repeat: true
         running: true
         onTriggered: {
-            getApi.updatePrice(); // Trigger price update based on configured interval
-            if (Plasmoid.configuration.blinkRefresh) {
+            getApi.updatePrice();
+            if (Plasmoid.configuration.blinkRefresh)
                 fadeAnimation.start();
-            }
         }
     }
-
-    spacing: 0
 }
